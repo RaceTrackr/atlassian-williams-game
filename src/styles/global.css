@@ -1,0 +1,597 @@
+/* ------------------------------------------------------------------
+   Williams Ultimate Team — global theme
+   ------------------------------------------------------------------
+   Brand tokens are the ones specified in the brief. On top of those
+   sits an iOS layer: Apple's dark-mode system greys, SF-style type
+   ramp, materials (translucent blurred bars), hairline separators and
+   spring easing — so the demo reads as a native iOS app rather than a
+   generic web page.
+------------------------------------------------------------------- */
+
+:root {
+  --color-primary-blue: #0072ce;
+  --color-black: #0a0a0a;
+  --color-keyline-red: #c8102e;
+  --color-keyline-white: #ffffff;
+  --radius-card: 16px;
+  --radius-panel: 24px;
+  --font-heading: 'Archivo', 'Arial Narrow', sans-serif; /* bold condensed geometric */
+  --font-body: system-ui, sans-serif;
+
+  /* -------- iOS system font stack (SF Pro on Apple devices) -------- */
+  --font-ios: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+    'Helvetica Neue', system-ui, sans-serif;
+
+  /* -------- surfaces --------
+     Apple's dark ladder, pulled toward Williams blue so the brand is in
+     the background itself rather than only in accents. */
+  --surface-0: #02090f;
+  --surface-1: #0a1a2c;
+  --surface-2: #12283f;
+  --surface-3: #1d3a56;
+  --grouped-bg: #02090f;
+
+  /* label colours, very slightly cooled to match */
+  --text-hi: #ffffff;
+  --text-mid: rgba(214, 232, 255, 0.64);
+  --text-lo: rgba(214, 232, 255, 0.34);
+  --hairline: rgba(96, 156, 220, 0.22);
+
+  /* iOS accent — brand blue stands in for systemBlue */
+  --tint: #0a84ff;
+  --tint-brand: #0072ce;
+  --ios-green: #30d158;
+  --ios-red: #ff453a;
+  --ios-yellow: #ffd60a;
+
+  /* -------- neon / esports layer --------
+     Gradients and glows do the work that borders used to. */
+  --neon-cyan: #00e5ff;
+  --neon-blue: #0a84ff;
+  --neon-magenta: #ff2e93;
+
+  --grad-primary: linear-gradient(135deg, #0072ce 0%, #00e5ff 100%);
+  --grad-red: linear-gradient(135deg, #c8102e 0%, #ff4d6d 100%);
+  --grad-gold: linear-gradient(135deg, #ffd700, #fffbe0 45%, #ffb800);
+  --grad-edge: linear-gradient(140deg, rgba(0, 229, 255, 0.55), rgba(255, 255, 255, 0.04) 42%, rgba(0, 114, 206, 0.45));
+  --grad-surface: linear-gradient(158deg, rgba(20, 48, 78, 0.92), rgba(6, 18, 32, 0.95));
+
+  --glow-blue: 0 0 22px rgba(10, 132, 255, 0.45);
+  --glow-cyan: 0 0 26px rgba(0, 229, 255, 0.4);
+  --glow-red: 0 0 22px rgba(200, 16, 46, 0.5);
+  --glow-gold: 0 0 26px rgba(255, 215, 0, 0.5);
+
+  /* angular corner cut used on hero surfaces and CTAs */
+  --cut: 14px;
+
+  /* materials & chrome */
+  --material-bar: rgba(7, 23, 40, 0.74);
+  --blur-bar: saturate(180%) blur(20px);
+  --ios-status-h: 50px;
+  --ios-nav-h: 44px;
+  --ios-tab-h: 78px;
+
+  /* iOS radii + spring */
+  --radius-ios: 12px;
+  --radius-sheet: 14px;
+  --spring: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* rarity */
+  --rarity-bronze: #cd7f32;
+  --rarity-silver: #c0c0c0;
+  --rarity-gold: #ffd700;
+  --rarity-legend: linear-gradient(135deg, #ffd700, #ffffff, #ffd700);
+
+  /* departments */
+  --dept-teamPrincipal: #c8102e;
+  --dept-engineering: #0072ce;
+  --dept-pitCrew: #ff8a00;
+  --dept-media: #9b5de5;
+  --dept-performance: #00c48c;
+
+  /* app frame */
+  --frame-w: 390px;
+  --frame-h: 844px;
+}
+
+* {
+  box-sizing: border-box;
+  /* Native apps don't have selectable UI text or draggable images —
+     nothing here is selectable or draggable. */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  /* The page BEHIND the phone — not part of the app itself. The image
+     is applied from App.vue so its URL can respect BASE_URL; this is
+     the fallback until the artwork is dropped in. */
+  background: #071a2e;
+  font-family: var(--font-ios);
+  color: var(--text-hi);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* Brand display type — kept condensed and uppercase for big moments
+   (screen titles, power numbers). Everything else uses SF. */
+h1,
+h2,
+h3,
+h4,
+.heading {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+button {
+  font-family: var(--font-ios);
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  transition: opacity 0.15s ease, transform 0.15s var(--spring);
+}
+
+button:active {
+  opacity: 0.55;
+}
+
+/* ---------------- iOS type ramp ---------------- */
+
+.ios-large-title {
+  font-family: var(--font-heading);
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Section headers get a lit tick mark on the left — small signal that
+   this is a game UI, not a settings list. */
+.ios-section-header {
+  position: relative;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin: 0 0 9px 0;
+  padding-left: 11px;
+}
+
+.ios-section-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 11px;
+  background: var(--grad-primary);
+  box-shadow: var(--glow-cyan);
+}
+
+.eyebrow {
+  font-family: var(--font-ios);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+.helper {
+  font-size: 13px;
+  line-height: 1.38;
+  color: var(--text-mid);
+  letter-spacing: -0.01em;
+}
+
+.footnote {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-lo);
+}
+
+/* ---------------- grouped inset lists (iOS Settings style) ------- */
+
+.ios-group {
+  position: relative;
+  background: var(--grad-surface);
+  border-radius: var(--radius-ios);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.ios-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 14px;
+  text-align: left;
+  background: transparent;
+  position: relative;
+}
+
+/* Hairline separator inset from the left, exactly like a UITableView. */
+.ios-row + .ios-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 0;
+  height: 0.5px;
+  background: var(--hairline);
+}
+
+.ios-row--inset-lg + .ios-row--inset-lg::before {
+  left: 62px;
+}
+
+.ios-chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--text-lo);
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* ---------------- panels & buttons ---------------- */
+
+/* Panels are a dark gradient slab with a lit gradient hairline rather
+   than a flat fill and a grey border. The ::before draws the edge by
+   masking out its own middle — a 1px gradient stroke. */
+.panel {
+  position: relative;
+  background: var(--grad-surface);
+  border: none;
+  border-radius: var(--radius-ios);
+  padding: 14px;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--grad-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Angular corner cut — the esports "clipped card" silhouette. Applied
+   only to hero surfaces and CTAs; everywhere would be noise. */
+.clip-corner {
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--cut)) 0,
+    100% var(--cut),
+    100% 100%,
+    var(--cut) 100%,
+    0 calc(100% - var(--cut))
+  );
+  border-radius: 0 !important;
+}
+
+/* Big numerals, lit from within */
+.num-neon {
+  background: var(--grad-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 14px rgba(0, 229, 255, 0.35));
+}
+
+.num-neon--gold {
+  background: var(--grad-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.4));
+}
+
+/* Segmented meter — gradient fill, notched, with a glow at the head */
+.meter {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--grad-primary);
+  box-shadow: var(--glow-cyan);
+  transition: width 0.45s var(--spring);
+}
+
+/* notches cut across any meter fill */
+.meter::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 9px,
+    rgba(10, 10, 12, 0.85) 9px 11px
+  );
+  pointer-events: none;
+}
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 0;
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--cut)) 0,
+    100% var(--cut),
+    100% 100%,
+    var(--cut) 100%,
+    0 calc(100% - var(--cut))
+  );
+  background: var(--grad-primary);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  /* drop-shadow, not box-shadow: clip-path clips an outer box-shadow
+     away entirely, but a filter follows the clipped silhouette. */
+  filter: drop-shadow(0 0 10px rgba(10, 132, 255, 0.5));
+}
+
+.btn:active {
+  transform: scale(0.97);
+  filter: drop-shadow(0 0 14px rgba(10, 132, 255, 0.7)) brightness(1.15);
+}
+
+.btn--ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--neon-cyan);
+  box-shadow: inset 0 0 0 1px rgba(0, 229, 255, 0.3);
+  filter: none;
+}
+
+.btn--red {
+  background: var(--grad-red);
+  filter: drop-shadow(0 0 10px rgba(200, 16, 46, 0.6));
+}
+
+.btn--red:active {
+  filter: drop-shadow(0 0 14px rgba(200, 16, 46, 0.8)) brightness(1.15);
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* iOS plain (borderless) button — text only, tint coloured */
+.btn-plain {
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--tint);
+  letter-spacing: -0.01em;
+}
+
+/* ---------------- segmented control ---------------- */
+
+.ios-segmented {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: rgba(10, 40, 72, 0.7);
+  border-radius: 9px;
+}
+
+.ios-segmented button {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 4px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.ios-segmented button.on {
+  background: var(--grad-primary);
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
+}
+
+/* ---------------- screens ---------------- */
+
+/* Every routed screen fills the frame and manages its own scrolling.
+   Top padding clears the status bar; the tab bar inset is applied by
+   the frame when the current route shows tabs. */
+/* Williams blue washes down from the top of every screen, with a red
+   ember in the bottom corner — brand in the ground, not just the trim. */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(125% 62% at 50% -8%, rgba(0, 114, 206, 0.42), transparent 62%),
+    radial-gradient(85% 45% at 108% 104%, rgba(200, 16, 46, 0.2), transparent 66%),
+    linear-gradient(180deg, #06243f 0%, #041526 38%, var(--surface-0) 100%);
+  overflow: hidden;
+  padding-top: var(--ios-status-h);
+}
+
+.has-tabbar .screen {
+  padding-bottom: var(--ios-tab-h);
+}
+
+.screen-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 16px 28px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.screen-body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Bottom action bar — translucent material, like an iOS toolbar. */
+.screen-footer {
+  flex-shrink: 0;
+  padding: 10px 16px 14px;
+  background: var(--material-bar);
+  backdrop-filter: var(--blur-bar);
+  -webkit-backdrop-filter: var(--blur-bar);
+  border-top: 0.5px solid var(--hairline);
+}
+
+.has-tabbar .screen-footer {
+  padding-bottom: 10px;
+}
+
+.scroll-area {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.scroll-area::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------------- navigation transitions ----------------
+   A UIKit push: both screens move at the same time for 350ms on the
+   same curve. The incoming screen slides in from the right and sits
+   on top; the outgoing one parallaxes left at 30% of the distance and
+   dims under it. Enter and leave must share a curve and duration or
+   the two halves visibly drift apart. */
+
+.push-enter-active,
+.push-leave-active,
+.pop-enter-active,
+.pop-leave-active,
+.modal-enter-active,
+.modal-leave-active {
+  transition: transform 0.35s var(--spring), filter 0.35s var(--spring),
+    opacity 0.35s var(--spring);
+  will-change: transform;
+}
+
+/* The screen arriving on top of the stack paints above the one leaving. */
+.push-enter-active,
+.pop-leave-active,
+.modal-enter-active,
+.modal-leave-active {
+  z-index: 2;
+}
+
+.push-leave-active,
+.pop-enter-active {
+  z-index: 1;
+}
+
+.push-enter-from {
+  transform: translateX(100%);
+}
+
+.push-leave-to {
+  transform: translateX(-30%);
+  filter: brightness(0.55);
+}
+
+.pop-enter-from {
+  transform: translateX(-30%);
+  filter: brightness(0.55);
+}
+
+.pop-leave-to {
+  transform: translateX(100%);
+}
+
+/* Modal presentation — full-screen cover slides up from the bottom,
+   and dismisses back down over the screen it came from. */
+.modal-enter-from {
+  transform: translateY(100%);
+}
+
+.modal-leave-to {
+  filter: brightness(0.55);
+}
+
+.modal-out-leave-active {
+  transition: transform 0.35s var(--spring);
+  z-index: 2;
+  will-change: transform;
+}
+
+.modal-out-leave-to {
+  transform: translateY(100%);
+}
+
+.modal-out-enter-active {
+  z-index: 1;
+}
+
+/* Tab switches: quick crossfade, both screens stacked in place. */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.16s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+

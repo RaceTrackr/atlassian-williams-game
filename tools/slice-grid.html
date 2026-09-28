@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Card grid slicer</title>
+    <style>
+      :root {
+        --blue: #0072ce;
+        --red: #c8102e;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 28px 20px 60px;
+        background: #0a0a0a;
+        color: #fff;
+        font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      }
+      .wrap { max-width: 860px; margin: 0 auto; }
+      h1 { font-size: 22px; margin: 0 0 4px; }
+      p.sub { color: #9aa0aa; margin: 0 0 22px; }
+      label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #9aa0aa; margin: 18px 0 6px; }
+      select, button {
+        font: inherit; color: #fff; background: #1c1c1e;
+        border: 1px solid #3a3a3c; border-radius: 10px; padding: 11px 13px;
+      }
+      select { width: 100%; }
+      button { cursor: pointer; }
+      button.primary { background: var(--blue); border-color: var(--blue); font-weight: 600; width: 100%; padding: 14px; margin-top: 16px; }
+      button.primary:disabled { opacity: .4; cursor: not-allowed; }
+      #drop {
+        margin-top: 8px; border: 2px dashed #3a3a3c; border-radius: 14px;
+        padding: 34px 20px; text-align: center; color: #9aa0aa; cursor: pointer;
+        transition: border-color .15s, background .15s;
+      }
+      #drop.over { border-color: var(--blue); background: rgba(0,114,206,.1); color: #fff; }
+      #preview { margin-top: 18px; display: none; }
+      #preview img { max-width: 100%; border-radius: 10px; display: block; }
+      .cells { display: grid; gap: 8px; margin-top: 18px; }
+      .cell { background: #1c1c1e; border-radius: 10px; padding: 8px; text-align: center; }
+      .cell canvas { width: 100%; height: auto; border-radius: 6px; display: block; background: #000; }
+      .cell span { display: block; font-size: 11px; color: #9aa0aa; margin-top: 6px; word-break: break-all; }
+      .cell.skip { opacity: .35; }
+      .note { margin-top: 22px; padding: 14px; background: #1c1c1e; border-left: 3px solid var(--red); border-radius: 0 10px 10px 0; color: #c9ced6; font-size: 13px; }
+      code { background: #2c2c2e; padding: 1px 5px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Card grid slicer</h1>
+      <p class="sub">
+        Cuts a ChatGPT grid image into individual card PNGs, named to match the card ids the app
+        expects. Runs entirely in your browser — nothing is uploaded.
+      </p>
+
+      <label for="batch">Which batch is this image?</label>
+      <select id="batch"></select>
+
+      <label>Grid image</label>
+      <div id="drop">Drop the image here, or click to choose a file</div>
+      <input type="file" id="file" accept="image/*" hidden />
+
+      <div id="preview">
+        <div class="cells" id="cells"></div>
+        <button class="primary" id="save">Download all cards</button>
+      </div>
+
+      <div class="note">
+        <strong>Heads up:</strong> your browser may ask to allow multiple downloads — say yes. Files
+        land in your downloads folder; move them into <code>public/assets/cards/</code>. Cells
+        marked <em>discard</em> are filler and won't be saved.
+      </div>
+    </div>
+
+    <script>
+      /* Batch definitions must match docs/card-art-prompts.md.
+         cols/rows describe the grid; ids are in reading order.
+         null = filler cell, not saved. */
+      const BATCHES = {
+        'Batch 1 — Cars': {
+          cols: 3, rows: 2,
+          ids: ['car-fw14b', 'car-fw18', 'car-fw07b', 'car-fw11b', 'car-fw26', 'car-fw08'],
+        },
+        'Batch 2 — Drivers A': {
+          cols: 3, rows: 2,
+          ids: ['drv-mansell', 'drv-prost', 'drv-senna', 'drv-jones', 'drv-rosberg', 'drv-piquet'],
+        },
+        'Batch 3 — Drivers B': {
+          cols: 3, rows: 2,
+          ids: ['drv-hill', 'drv-villeneuve', 'drv-patrese', 'drv-montoya', 'drv-boutsen', null],
+        },
+        'Batch 4 — Parts A': {
+          cols: 3, rows: 2,
+          ids: ['prt-nose-blade', 'prt-nose-chisel', 'prt-rw-highdf', 'prt-rw-lowdrag', 'prt-diff-double', 'prt-diff-stepped'],
+        },
+        'Batch 5 — Parts B': {
+          cols: 2, rows: 2,
+          ids: ['prt-ut-active', 'prt-ut-plank', 'prt-sp-slim', 'prt-sp-cooling'],
+        },
+        'Batch 6 — Team Principals': {
+          cols: 2, rows: 2,
+          ids: ['stf-tp-frank-williams', 'stf-tp-patrick-head', 'stf-tp-claire-williams', 'stf-tp-james-vowles'],
+        },
+        'Batch 7 — Engineering': {
+          cols: 3, rows: 2,
+          ids: ['stf-eng-01', 'stf-eng-02', 'stf-eng-03', 'stf-eng-04', 'stf-eng-05', 'stf-eng-06'],
+        },
+        'Batch 8 — Remaining staff': {
+          cols: 3, rows: 2,
+          ids: ['stf-eng-07', 'stf-med-01', 'stf-med-02', 'stf-perf-01', 'stf-perf-02', null],
+        },
+        'Batch 9 — Pit Crew': {
+          cols: 3, rows: 2,
+          ids: ['stf-pit-01', 'stf-pit-02', 'stf-pit-03', 'stf-pit-04', 'stf-pit-05', 'stf-pit-06'],
+        },
+      }
+
+      const sel = document.getElementById('batch')
+      Object.keys(BATCHES).forEach((k) => {
+        const o = document.createElement('option')
+        o.value = k
+        o.textContent = k
+        sel.appendChild(o)
+      })
+
+      const drop = document.getElementById('drop')
+      const fileInput = document.getElementById('file')
+      const preview = document.getElementById('preview')
+      const cellsEl = document.getElementById('cells')
+      const saveBtn = document.getElementById('save')
+      let img = null
+
+      drop.onclick = () => fileInput.click()
+      drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('over') }
+      drop.ondragleave = () => drop.classList.remove('over')
+      drop.ondrop = (e) => {
+        e.preventDefault()
+        drop.classList.remove('over')
+        if (e.dataTransfer.files[0]) load(e.dataTransfer.files[0])
+      }
+      fileInput.onchange = () => fileInput.files[0] && load(fileInput.files[0])
+      sel.onchange = () => img && render()
+
+      function load(file) {
+        const url = URL.createObjectURL(file)
+        img = new Image()
+        img.onload = () => { drop.textContent = file.name + ' — ' + img.width + '×' + img.height; render() }
+        img.src = url
+      }
+
+      function render() {
+        const b = BATCHES[sel.value]
+        cellsEl.innerHTML = ''
+        cellsEl.style.gridTemplateColumns = `repeat(${b.cols}, 1fr)`
+        const cw = img.width / b.cols
+        const ch = img.height / b.rows
+
+        b.ids.forEach((id, i) => {
+          const cx = (i % b.cols) * cw
+          const cy = Math.floor(i / b.cols) * ch
+          const c = document.createElement('canvas')
+          c.width = Math.round(cw)
+          c.height = Math.round(ch)
+          c.getContext('2d').drawImage(img, cx, cy, cw, ch, 0, 0, c.width, c.height)
+
+          const wrap = document.createElement('div')
+          wrap.className = 'cell' + (id ? '' : ' skip')
+          wrap.appendChild(c)
+          const label = document.createElement('span')
+          label.textContent = id ? id + '.png' : 'discard'
+          wrap.appendChild(label)
+          cellsEl.appendChild(wrap)
+          if (id) c.dataset.name = id
+        })
+        preview.style.display = 'block'
+      }
+
+      saveBtn.onclick = async () => {
+        const canvases = [...cellsEl.querySelectorAll('canvas')].filter((c) => c.dataset.name)
+        saveBtn.disabled = true
+        for (const c of canvases) {
+          const blob = await new Promise((r) => c.toBlob(r, 'image/png'))
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = c.dataset.name + '.png'
+          document.body.appendChild(a)
+          a.click()
+          a.remove()
+          // Browsers throttle rapid downloads, and revoking the URL too
+          // early cancels one that is still in flight.
+          await new Promise((r) => setTimeout(r, 400))
+          URL.revokeObjectURL(url)
+        }
+        saveBtn.disabled = false
+        saveBtn.textContent = 'Download all cards'
+      }
+    </script>
+  </body>
+</html>
